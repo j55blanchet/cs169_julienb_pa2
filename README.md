@@ -11,9 +11,9 @@ Julien Blanchet | Robotics Perception Systems | 2/2/20
 
 This repository is intended to be a *single package* within a catkin repository. Therefore, you must use an exising catkin workspace or create a new one. Steps for setup:
 
-
 1. `cd` to the `src` folder of your catkin workspace
-1. copy the contents of this repositrory into a folder titled `cs169_julienb_pa1` (this will be the package name)
+1. copy the contents of this repositrory into a folder titled `julienb_kalmanfilter` (this will be the package name)
+1. Download the bag file from https://1drv.ms/u/s!AiFiPYRO3Kyph49sCXQj4euRLGRaRA?e=ATnOvU and save it as `<workspaceroot>/src/julienb_kalmanfilter/bags/record.bag`
 1. Run `catkin_make` at the root of your workspace.
 
 ## Running

@@ -1,0 +1,5 @@
+<launch>
+    <arg name="bagfile" default="record.bag"/>
+    
+    <node pkg="rosbag" type="record" name="rosbag_recording_node" args="-o $(find julienb_kalmanfilter)/bags/$(arg bagfile)" />
+</launch>
