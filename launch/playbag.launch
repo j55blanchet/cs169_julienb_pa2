@@ -1,8 +1,25 @@
 <launch>
     <arg name="bagfile" default="mingi-record.bag"/>
-    
+    <arg name="mode" default="cmdvel_scan"/>
+
     <node pkg="rosbag" type="play" name="rosbag_playback_node" args="$(find julienb_kalmanfilter)/bags/$(arg bagfile)" />
 
-    <node pkg="julienb_kalmanfilter" type="pa2-poseestimator.py" name="poseestimator" output="screen" />
-    <!-- <node pkg="rostopic" type="rostopic" name="rostopic_display" args="echo cmd_vel" output="screen" /> -->
+    <node pkg="julienb_kalmanfilter" type="pa2-poseestimator.py" name="poseestimator" output="screen">
+        <param name="outfile" value="$(find julienb_kalmanfilter)/report/state_estimate.csv"/>
+    </node>
+
+    <node pkg="julienb_kalmanfilter" type="odomtf_publisher.py" name="odomtf_publisher" />
+
+    <!-- <node pkg="julienb_kalmanfilter" type="datarecorder.py" name="datarecorder">
+        <param name="recordtopic" value="state_estimate" />
+
+        cmdvel_scan
+
+        <param name="outfile" value="$(find julienb_kalmanfilter)/report/$(" />
+    </node> -->
+    <!-- if="$(eval arg('mode') is 'cmdvel_scan')" -->
+    <node pkg="julienb_kalmanfilter" type="datarecorder.py" name="datarecorder" >
+        <!-- <param name="recordtopic" value="pose" /> -->
+        <param name="outfile" value="$(find julienb_kalmanfilter)/report/a_pose.csv" />
+    </node>
 </launch>

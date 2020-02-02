@@ -10,6 +10,7 @@
 
 import rospy
 import numpy
+import tf
 from geometry_msgs.msg import PoseWithCovarianceStamped, Twist
 from sensor_msgs.msg import LaserScan
 from kalmanfilter import KalmanFilter
@@ -18,7 +19,6 @@ INITIAL_BELIEF = numpy.matrix([0.0])
 INITIAL_UNCERTAINTY = numpy.matrix([1.0])
 
 STATE_EVOLUTION = numpy.matrix([1.0]) # We expect position to remain constant in absence of control
-ACTION_MODEL = numpy.matrix([])
 
 MOTION_NOISE = 0.05
 SENSE_NOISE = 0.05
@@ -39,7 +39,11 @@ class PoseEstimator:
         rospy.Subscriber("cmd_vel", Twist, self.on_cmdvel, queue_size=1)
         rospy.Subscriber("scan", LaserScan, self.on_scan, queue_size=1)
         self.state_pub = rospy.Publisher("state_estimate", PoseWithCovarianceStamped, queue_size=1)
+        self.tf_broadcaster = tf.TransformBroadcaster()
         
+        outfile = rospy.get_param("~outfile", default="output.csv")
+        self.outfile = open(outfile, "w")
+
         self.kfilter = KalmanFilter(
             INITIAL_BELIEF,
             INITIAL_UNCERTAINTY,
@@ -108,18 +112,36 @@ class PoseEstimator:
 
 
     def publish_state_estimation(self):
+        robot_x = self.kfilter.belief.item(0)
+        uncertainty = self.kfilter.uncertainty.item(0)
         pose = PoseWithCovarianceStamped()
-        pose.pose.pose.position.x = self.kfilter.belief
+        pose.pose.pose.position.x = robot_x
         pose.pose.covariance = numpy.matrix([
-            [self.kfilter.uncertainty, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0]
+            [uncertainty, 0, 0, 0, 0, 0],
+            [0,           0, 0, 0, 0, 0],
+            [0,           0, 0, 0, 0, 0],
+            [0,           0, 0, 0, 0, 0],
+            [0,           0, 0, 0, 0, 0],
+            [0,           0, 0, 0, 0, 0]
         ])
         self.state_pub.publish(pose)
-        rospy.loginfo("position: {0}    uncertainty: {1}".format(self.kfilter.belief, self.kfilter.uncertainty))
+        
+        self.tf_broadcaster.sendTransform(
+                        (robot_x, 0, 0),
+                        tf.transformations.quaternion_from_euler(0, 0, 0),
+                        rospy.Time.now(),
+                        "odom_kf",
+                        "base_footprint"
+        )
+
+        rospy.loginfo("\tposition: {0}    uncertainty: {1}".format(self.kfilter.belief, self.kfilter.uncertainty))
+
+        self.outfile.write("{0},{1}\n".format(robot_x, uncertainty))
+        rospy.loginfo("\twrote data to file at {0}".format(self.outfile.name))
+
+    def __del__(self):
+        self.outfile.close()
+    
 
 def main():
     rospy.init_node("pa2_poseestimator")
