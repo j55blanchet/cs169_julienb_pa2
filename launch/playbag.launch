@@ -1,5 +1,8 @@
 <launch>
-    <arg name="bagfile" default="record.bag"/>
+    <arg name="bagfile" default="mingi-record.bag"/>
     
-    <node pkg="rosbag" type="record" name="rosbag_recording_node" args="-o $(find julienb_kalmanfilter)/bags/$(arg bagfile)" />
+    <node pkg="rosbag" type="play" name="rosbag_playback_node" args="$(find julienb_kalmanfilter)/bags/$(arg bagfile)" />
+
+    <node pkg="julienb_kalmanfilter" type="pa2-poseestimator.py" name="poseestimator" output="screen" />
+    <!-- <node pkg="rostopic" type="rostopic" name="rostopic_display" args="echo cmd_vel" output="screen" /> -->
 </launch>

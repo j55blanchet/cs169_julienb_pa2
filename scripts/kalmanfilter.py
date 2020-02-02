@@ -23,11 +23,11 @@ class KalmanFilter:
         self.uncertainty = self.state_evolution * self.uncertainty * self.state_evolution.transpose()
         self.uncertainty += self.motion_noise
 
-    def update(self, sensor_model, reading):
-        expected_reading = sensor_model * reading
+    def update(self, expected_reading, reading):
+        # expected_reading = sensor_model * reading
         reading_error = reading - expected_reading
-        sensor_covariance = sensor_model * self.uncertainty * sensor_model.transpose() + self.sense_noise
+        sensor_covariance = self.uncertainty + self.sense_noise
         inverse_sensor_covariance = numpy.linalg.inv(sensor_covariance)
-        kalman_gain = self.uncertainty * sensor_model.transpose() * inverse_sensor_covariance
+        kalman_gain = self.uncertainty * inverse_sensor_covariance
         self.uncertainty += kalman_gain * reading_error
-        self.uncertainty = self.uncertainty - self.uncertainty * sensor_model.transpose() * inverse_sensor_covariance * sensor_model * self.uncertainty
+        self.uncertainty = self.uncertainty - self.uncertainty * inverse_sensor_covariance * self.uncertainty
