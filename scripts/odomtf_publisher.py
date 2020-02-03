@@ -26,8 +26,8 @@ def main():
             (position.x, position.y, position.z),
             msg.pose.pose.orientation,
             msg.header.stamp,
-            "odom_kf",
-            "base_footprint"
+            "world",
+            "odom_kf"
         )
 
     rospy.Subscriber("initialpose", PoseWithCovarianceStamped, on_initialpose_received, queue_size=1)
