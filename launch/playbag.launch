@@ -1,25 +1,30 @@
 <launch>
     <arg name="bagfile" default="mingi-record.bag"/>
-    <arg name="mode" default="cmdvel_scan"/>
 
-    <node pkg="rosbag" type="play" name="rosbag_playback_node" args="$(find julienb_kalmanfilter)/bags/$(arg bagfile)" />
+    <arg name="mode" default="b"/>
+
+    <node pkg="rosbag" type="play" name="rosbag_playback_node" args="$(find julienb_kalmanfilter)/bags/$(arg bagfile)">  
+        <remap if="$(eval arg('mode') is 'd' or arg('mode') is 'e')" from="scan" to="laserscan_orig" />
+    </node>
 
     <node pkg="julienb_kalmanfilter" type="pa2-poseestimator.py" name="poseestimator" output="screen">
-        <param name="outfile" value="$(find julienb_kalmanfilter)/report/state_estimate.csv"/>
+        <param name="outfile" value="$(find julienb_kalmanfilter)/report/$(arg mode)_state_estimate.csv"/>
+        <param name="mode" value="$(arg mode)" />
     </node>
 
     <node pkg="julienb_kalmanfilter" type="odomtf_publisher.py" name="odomtf_publisher" />
 
-    <!-- <node pkg="julienb_kalmanfilter" type="datarecorder.py" name="datarecorder">
-        <param name="recordtopic" value="state_estimate" />
+    <node if="$(eval arg('mode') is 'd' or arg('mode') is 'e')" pkg="depthimage_to_laserscan" type="depthimage_to_laserscan" name="depthimage_to_laserscan">
+          <remap from="image" to="camera/depth/image_raw"/>
+    </node>
 
-        cmdvel_scan
+    <node   if="$(eval arg('mode') is 'd' or arg('mode') is 'e')"
+            type="republish" 
+            pkg="image_transport" 
+            name="image_decompressor" 
+            args="compressed in:=/camera/depth/image_raw raw out:=/camera/depth/image_raw" />
 
-        <param name="outfile" value="$(find julienb_kalmanfilter)/report/$(" />
-    </node> -->
-    <!-- if="$(eval arg('mode') is 'cmdvel_scan')" -->
     <node pkg="julienb_kalmanfilter" type="datarecorder.py" name="datarecorder" >
-        <!-- <param name="recordtopic" value="pose" /> -->
         <param name="outfile" value="$(find julienb_kalmanfilter)/report/a_pose.csv" />
     </node>
 </launch>

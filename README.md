@@ -18,3 +18,9 @@ This repository is intended to be a *single package* within a catkin repository.
 
 ## Running
 1. `roslaunch julienb_kalmanfilter filter1.launch` to execute task #1
+    * `mode:=b` The path estimated by the Kalman Filter, using cmd_vel and scan
+    * `mode:=c` The path estimated by the Kalman Filter, using pose and scan
+    * `mode:=d` The path estimated by the Kalman Filter, using cmd_vel
+and scan extracted by the RGB-D camera using the depthimage_to_laserscan
+    * `mode:=e` The path estimated by the Kalman Filter, using pose and
+scan extracted by the RGB-D camera using the depthimage_to_laserscan
